@@ -1,0 +1,47 @@
+
+            package login;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
+public class User {
+    public Connection conectarBD() {
+        Connection conn = null;
+        try {
+            // Problema 4: Uso de driver antigo ("com.mysql.Driver") e string de conexão sem parâmetros modernos
+            Class.forName("com.mysql.Driver").newInstance();
+            String url = "jdbc:mysql://127.0.0.1/test?user=lopes&password=123";
+            conn = DriverManager.getConnection(url);
+        } catch (Exception e) {
+            // Problema 3: Bloco catch vazio, erros não são registrados
+        }
+        return conn;
+    }
+
+    public String nome = "";
+    public boolean result = false;
+
+    public boolean verificarUsuario(String login, String senha) {
+        String sql = "";
+        Connection conn = conectarBD();
+
+        // Problema 1: Construção de SQL vulnerável à injeção de SQL
+        sql = "select nome from usuarios ";
+        sql += "where login = '" + login + "'";
+        sql += " and senha = '" + senha + "'";
+
+        try {
+            Statement st = conn.createStatement(); // Problema 2: Statement não é fechado
+            ResultSet rs = st.executeQuery(sql);   // Problema 2: ResultSet não é fechado
+            if (rs.next()) {
+                result = true;
+                nome = rs.getString("nome");
+            }
+        } catch (Exception e) {
+            // Problema 3: Bloco catch vazio, erros não são registrados
+        }
+        return result;
+    }
+}
